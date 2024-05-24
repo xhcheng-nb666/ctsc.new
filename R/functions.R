@@ -16,11 +16,11 @@
 #' @return Negative Predictive Value: The proportion of negative results that are true negative.
 #' @return F1 score: The average of precision(i.e. ppv) and recall(i.e. Sens). It signifies that the model can effectively identify positive cases while minimizing false positives and false negatives.
 #' @return Youden: A single statistic that captures the performance of a dichotomous diagnostic test.
-#' @export
 #' @examples
 #' x = sample(c(T,F), 1000, replace = T)
 #' y = sample(c(T,F), 1000, replace = T)
 #' get_stat(x,y)
+#' @export
 
 
 get_stat <- function(Actual, Prediction) {
@@ -105,17 +105,18 @@ get_performance_measures()
 #' @param thresholds (optional) A numeric vector specifying the thresholds for binary classification. Default: 50.
 #' @param round (optional) A logical value indicating whether to round the output metrics. Default: TRUE.
 #' @return A data table containing performance measures for each specified threshold, including sensitivity, specificity, balanced accuracy, accuracy, positive predictive value (ppv), negative predictive value (npv), F1 score, and Youden's index.
-#' @export
 #' @examples
-#' Example 1: Using default parameters
-performance_metrics_default <- get_performance_measures()
+#' # Example 1: Using default parameters
+#' library(data.table)
+#' performance_metrics_default <- get_performance_measures()
 
-#' Example 2: Specifying custom parameters
-custom_scores <- c(80, 65, 72, 90, 85)
-custom_truth <- c(TRUE, FALSE, TRUE, TRUE, FALSE)
-custom_thresholds <- c(60, 70, 80)
-custom_metrics <- get_performance_measures(score = custom_scores, truth = custom_truth, thresholds = custom_thresholds, round = FALSE)
-
+#' # Example 2: Specifying custom parameters
+#' library(data.table)
+#' custom_scores <- c(80, 65, 72, 90, 85)
+#' custom_truth <- c(TRUE, FALSE, TRUE, TRUE, FALSE)
+#' custom_thresholds <- c(60, 70, 80)
+#' custom_metrics <- get_performance_measures(score = custom_scores, truth = custom_truth, thresholds = custom_thresholds, round = FALSE)
+#' @export
 
 
 get_performance_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c(TRUE, FALSE), 100, replace = TRUE), thresholds = 50, round = TRUE){
@@ -198,16 +199,16 @@ get_performance_measures = function(score = runif(100, min = 0, max = 100), trut
 #' @param BootID (optional) Indices for bootstrap sampling. Default: 1:length(score)
 #' @param confidence_level (optional) Confidence level for constructing confidence intervals. Default: 0.95.
 #' @return A list containing performance measures, performance_measurements_lower_bound, performance_measurements_upper_bound, auc(area under the ROC curve), auc lower bound, auc upper bound, pr(area under the precision-recall curve, or PR AUC), pr lower bound, pr upper bound, percentage_of_truth_in_each_bin, thresholds(used for binning scores))
-#' @export
 #' @examples
 #' # Example 1: Using default parameters
-result_default <- all_measures()
+#' result_default <- all_measures()
 
 #' # Example 2: Specifying custom parameters
-custom_scores <- c(80, 65, 72, 90, 85)
-custom_truth <- c(TRUE, FALSE, TRUE, TRUE, FALSE)
-custom_thresholds <- c(60, 70, 80)
-custom_result <- all_measures(score = custom_scores, truth = custom_truth, thresholds = custom_thresholds, use_Boot = TRUE)
+#' custom_scores <- c(80, 65, 72, 90, 85)
+#' custom_truth <- c(TRUE, FALSE, TRUE, TRUE, FALSE)
+#' custom_thresholds <- c(60, 70, 80)
+#' custom_result <- all_measures(score = custom_scores, truth = custom_truth, thresholds = custom_thresholds, use_Boot = TRUE)
+#' @export
 
 
 
@@ -389,13 +390,13 @@ all_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c
 #' @param digits (optional) Number of digits to round the summary statistics to (default is 2).
 #' @param quantiles (optional) Numeric vector specifying the quantiles to compute. Defaults to c(5, 25, 75, 95).
 #' @return A named numeric vector containing the computed summary statistics.
-#' @export
 #' @examples
 #' #Example 1:
-data <- runif(n = 50, min = 1, max = 100)
-summary_stat(data)
+#' data <- runif(n = 50, min = 1, max = 100)
+#' summary_stat(data)
 #' #Example 2:
-summary_stat(data, digits = 3, quantiles = c(10, 50, 100))
+#' summary_stat(data, digits = 3, quantiles = c(10, 50, 100))
+#' @export
 
 
 
