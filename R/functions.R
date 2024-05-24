@@ -21,8 +21,6 @@
 #' y = sample(c(T,F), 1000, replace = T)
 #' get_stat(x,y)
 #' @export
-
-
 get_stat <- function(Actual, Prediction) {
   Actual <- factor(Actual, level = c(T, F))
   Prediction <- factor(Prediction, level = c(T, F))
