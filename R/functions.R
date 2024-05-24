@@ -115,9 +115,7 @@ get_performance_measures()
 #' custom_thresholds <- c(60, 70, 80)
 #' custom_metrics <- get_performance_measures(score = custom_scores, truth = custom_truth, thresholds = custom_thresholds, round = FALSE)
 #' @export
-
-
-get_performance_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c(TRUE, FALSE), 100, replace = TRUE), thresholds = 50, round = TRUE){
+get_performance_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE, truth = data_BED_PLANNING_training$ADMIT_FLAG=="Admitted", thresholds = 50, round = TRUE){
   # pred <- prediction(score, true)
   # cutoffs = pred@cutoffs[[1]]
   # sens <- performance(pred, "sens")@y.values[[1]]
@@ -127,7 +125,6 @@ get_performance_measures = function(score = runif(100, min = 0, max = 100), trut
   # npv <- performance(pred, "npv")@y.values[[1]]
   # return(list(sens = sens, spec = spec, balanced_accuracy = balanced_accuracy, ppv = ppv, npv = npv, cutoffs = cutoffs))
 
-  #apply the functioin, and then transpose the result.
   data.table::data.table(t(sapply(thresholds, function(threshold){
     predict <- score >= threshold
     TNs = sum((truth==0)&(predict==0))
@@ -179,6 +176,7 @@ get_performance_measures = function(score = runif(100, min = 0, max = 100), trut
 
 
 }
+
 
 
 
