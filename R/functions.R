@@ -339,10 +339,11 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
   }
 
 
-
+  PRROC::pr.curve(score[truth==1], score[truth==0])
   # calculate PR auc and confidence bounds
-  pr_temp = prcurve.ap(score[truth==1], score[truth==0])
-  pr = pr_temp$area
+  # pr_temp = prcurve.ap(score[truth==1], score[truth==0])
+  pr_temp =   PRROC::pr.curve(score[truth==1], score[truth==0])
+  pr = pr_temp$auc.integral
   if(!use_Boot){
     ciPR = pr_temp
     pr_lower_bound = ciPR$conf.int[1]
@@ -350,7 +351,8 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
   }else{
     pr_boot = c()
     for(b in 1:n_Boot){
-      pr_boot[b] = prcurve.ap(boot_scores[[b]][boot_truths[[b]]==1], boot_scores[[b]][boot_truths[[b]]==0])$area
+      #pr_boot[b] = prcurve.ap(boot_scores[[b]][boot_truths[[b]]==1], boot_scores[[b]][boot_truths[[b]]==0])$area
+      pr_boot[b] = PRROC::pr.curve(boot_scores[[b]][boot_truths[[b]]==1], boot_scores[[b]][boot_truths[[b]]==0])$auc.integral
     }
     pr_lower_bound = quantile(pr_boot, alpha/2)
     pr_upper_bound = quantile(pr_boot, 1-alpha/2)
