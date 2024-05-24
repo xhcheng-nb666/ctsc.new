@@ -339,7 +339,7 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
   }
 
 
-  PRROC::pr.curve(score[truth==1], score[truth==0])
+  # PRROC::pr.curve(score[truth==1], score[truth==0])
   # calculate PR auc and confidence bounds
   # pr_temp = prcurve.ap(score[truth==1], score[truth==0])
   pr_temp =   PRROC::pr.curve(score[truth==1], score[truth==0])
