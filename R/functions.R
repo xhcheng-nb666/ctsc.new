@@ -207,14 +207,8 @@ get_performance_measures = function(score = runif(100, min = 0, max = 100), trut
 #' custom_thresholds <- c(60, 70, 80)
 #' custom_result <- all_measures(score = custom_scores, truth = custom_truth, thresholds = custom_thresholds, use_Boot = TRUE)
 #' @export
-
-
-
-
-
-
-
-all_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c(TRUE, FALSE), 100, replace = TRUE),
+all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
+                        truth = data_BED_PLANNING_training$ADMIT_FLAG == 'Admitted',
                         thresholds = 1:100,
                         n_Boot = 1000,
                         use_Boot = FALSE,
@@ -223,7 +217,6 @@ all_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c
 
   alpha = 1 - confidence_level
 
-  #check if the package is downloaded
   pacman::p_load(ROCR)
 
   # score = data_BED_PLANNING_training$TOTAL_SCORE
@@ -287,10 +280,21 @@ all_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c
     }
     # get performance for each bootstrap sample
     performance_measures_boot = list()
+
+    boot_scores = boot_truths = list()
     for(b in 1:n_Boot){
       # print(b/n_Boot)
+
+      boot_score = boot_truth = c()
+      for(s in 1:length(sample_indexes[[b]])){
+        boot_score = c(boot_score, score[BootID %in% sample_indexes[[b]][s]])
+        boot_truth = c(boot_truth, truth[BootID %in% sample_indexes[[b]][s]])
+      }
+      boot_scores[[b]] = boot_score
+      boot_truths[[b]] = boot_truth
+
       performance_measures_boot[[b]] =
-        get_performance_measures(score[BootID %in% sample_indexes[[b]]], truth[BootID %in% sample_indexes[[b]]], thresholds, round = FALSE)
+        get_performance_measures(boot_score, boot_truth, thresholds, round = FALSE)
     }
     # calculate the 2.5% and 97.5% confidence bounds
     measurements = colnames(performance_measures)
@@ -328,8 +332,9 @@ all_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c
 
   }else{
     auc_boot = c()
+
     for(b in 1:n_Boot){
-      auc_boot[b] = performance(prediction(score[BootID %in% sample_indexes[[b]]], truth[BootID %in% sample_indexes[[b]]]), "auc")@y.values[[1]]
+      auc_boot[b] = performance(prediction(boot_scores[[b]], boot_truths[[b]]), "auc")@y.values[[1]]
     }
     auc_lower_bound = quantile(auc_boot, alpha/2)
     auc_upper_bound = quantile(auc_boot, 1-alpha/2)
@@ -347,7 +352,7 @@ all_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c
   }else{
     pr_boot = c()
     for(b in 1:n_Boot){
-      pr_boot[b] = prcurve.ap(score[BootID %in% sample_indexes[[b]]][truth[BootID %in% sample_indexes[[b]]]==1], score[BootID %in% sample_indexes[[b]]][truth[BootID %in% sample_indexes[[b]]]==0])$area
+      pr_boot[b] = prcurve.ap(boot_scores[[b]][boot_truths[[b]]==1], boot_scores[[b]][boot_truths[[b]]==0])$area
     }
     pr_lower_bound = quantile(pr_boot, alpha/2)
     pr_upper_bound = quantile(pr_boot, 1-alpha/2)
@@ -377,6 +382,7 @@ all_measures = function(score = runif(100, min = 0, max = 100), truth = sample(c
 
   ))
 }
+
 
 
 
