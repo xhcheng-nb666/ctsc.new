@@ -51,47 +51,6 @@ get_stat <- function(Actual, Prediction) {
 
 
 
-#' Hello
-#'
-#' Hello description
-#' @param no
-#' @export
-#' @examples
-#' hello()
-hello <- function() {
-  print("Hello, world!")
-}
-
-
-
-#' Get Performance Measures
-#'
-#' Get Performance Measures description
-#' @param
-
-
-get_performance_measures <- function(probability = runif(100), actual = sample(c(TRUE, FALSE), 100, replace = TRUE), thresholds = seq(0.1, 1, by = 0.1)) {
-  stats <- c("True Positive", "True Negative", "False Positive", "False Negative", "Sensitivity", "Specificity", "Accuracy", "Balanced Accuracy", "Case Prevalence", "Positive Predictive Value", "Negative Predictive Value", "F1 Score", "Youden's Index")
-  performance_measure_results <- matrix(0, nrow = length(thresholds), ncol = length(stats), byrow = TRUE)
-  for (i in 1:length(thresholds)) {
-    current_threshold = thresholds[i]
-    prediction <- ifelse(probability > current_threshold, TRUE, FALSE)
-    performance_measure_results[i, ] <- get_stat(actual, prediction)
-  }
-  rownames(performance_measure_results) <- thresholds
-  colnames(performance_measure_results) <- stats
-  print(performance_measure_results)
-}
-
-get_performance_measures()
-
-
-
-
-
-
-
-
 
 
 
@@ -107,7 +66,6 @@ get_performance_measures()
 #' # Example 1: Using default parameters
 #' library(data.table)
 #' performance_metrics_default <- get_performance_measures()
-
 #' # Example 2: Specifying custom parameters
 #' library(data.table)
 #' custom_scores <- c(80, 65, 72, 90, 85)
@@ -341,9 +299,9 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
 
   # PRROC::pr.curve(score[truth==1], score[truth==0])
   # calculate PR auc and confidence bounds
-  # pr_temp = prcurve.ap(score[truth==1], score[truth==0])
-  pr_temp =   PRROC::pr.curve(score[truth==1], score[truth==0])
-  pr = pr_temp$auc.integral
+  pr_temp = prcurve.ap(score[truth==1], score[truth==0])
+  # pr_temp =   PRROC::pr.curve(score[truth==1], score[truth==0])
+  pr = pr_temp$auc
   if(!use_Boot){
     ciPR = pr_temp
     pr_lower_bound = ciPR$conf.int[1]
@@ -351,8 +309,8 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
   }else{
     pr_boot = c()
     for(b in 1:n_Boot){
-      #pr_boot[b] = prcurve.ap(boot_scores[[b]][boot_truths[[b]]==1], boot_scores[[b]][boot_truths[[b]]==0])$area
-      pr_boot[b] = PRROC::pr.curve(boot_scores[[b]][boot_truths[[b]]==1], boot_scores[[b]][boot_truths[[b]]==0])$auc.integral
+      pr_boot[b] = prcurve.ap(boot_scores[[b]][boot_truths[[b]]==1], boot_scores[[b]][boot_truths[[b]]==0])$area
+      # pr_boot[b] = PRROC::pr.curve(boot_scores[[b]][boot_truths[[b]]==1], boot_scores[[b]][boot_truths[[b]]==0])$auc.integral
     }
     pr_lower_bound = quantile(pr_boot, alpha/2)
     pr_upper_bound = quantile(pr_boot, 1-alpha/2)
@@ -401,9 +359,6 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
 #' #Example 2:
 #' summary_stat(data, digits = 3, quantiles = c(10, 50, 100))
 #' @export
-
-
-
 summary_stat = function(x, digits = 2, quantiles = c(5, 25, 75, 95)) {
 
   minimum = min(x)
