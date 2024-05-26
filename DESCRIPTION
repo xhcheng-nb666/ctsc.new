@@ -1,12 +1,20 @@
 Package: ctsc.dev
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Analysis Functions to Calculate Various Statistics
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: c(
+    person("Sili", "Fan", email = "fansili2013@gmail.com", role = c("aut", "cre")), 
+    person("Xiaohang", "Cheng", email = "xhcheng@ucdavis.edu", role = "aut")
+    )
+Description: Provides functions to calculate various statistics and performance measures for binary classification tasks.
+License: CTSC
 Encoding: UTF-8
 LazyData: true
+Imports:
+    data.table,
+    ROCR,
+    pROC,
+    pacman
+Suggests:
+    testthat
 RoxygenNote: 7.3.1.9000
