@@ -516,7 +516,7 @@ summary_stat = function(x, digits = 2, quantiles = c(5, 25, 75, 95)) {
 
   result <- round(c(mean, standard_deviation, minimum, summary_lower_quantile, median, summary_upper_quantile, maximum, range), digits = digits)
 
-  names(result) = c("Mean", "SD", "Min",  "5th Quantile", "25th Quantile", "Median", "75th Quantile", "95th Quantile", "Max", "Range")
+  names(result) = c("Mean", "SD", "Min", paste0(lower_quantiles, "th Quantile"), "Median", paste0(upper_quantiles, "th Quantile"), "Max", "Range")
   return(result)
 }
 
