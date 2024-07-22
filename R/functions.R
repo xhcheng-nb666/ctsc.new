@@ -431,7 +431,8 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
   # calculate PR auc and confidence bounds
   pr_temp = prcurve.ap(score[truth==1], score[truth==0])
   # pr_temp =   PRROC::pr.curve(score[truth==1], score[truth==0])
-  pr = pr = pr_temp$area
+  pr = pr_temp$area
+
   if(!use_Boot){
     ciPR = pr_temp
     pr_lower_bound = ciPR$conf.int[1]
