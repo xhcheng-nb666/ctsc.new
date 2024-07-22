@@ -135,7 +135,15 @@ get_performance_measures = function(score = data_BED_PLANNING_training$TOTAL_SCO
   dt <- data.table(score = score, truth = truth)
 
   # Create a data.table with all combinations of score, truth, and thresholds
-  dt_thresholds <- dt[, .(threshold = thresholds), by = .(score, truth)]
+  # dt_thresholds <- dt[, .(threshold = thresholds), by = .(score, truth)]
+  dt_list <- lapply(thresholds, function(th) {
+    dt_copy <- copy(dt)  # Copy dt to avoid modifying the original dt
+    dt_copy[, threshold := th]  # Add the new column 'threshold'
+    return(dt_copy)
+  })
+
+  # Combine all data.tables into one
+  dt_thresholds <- rbindlist(dt_list)
 
   # Add a column for predictions
   dt_thresholds[, predict := score >= threshold]
@@ -145,6 +153,9 @@ get_performance_measures = function(score = data_BED_PLANNING_training$TOTAL_SCO
   dt_thresholds[, TPs := sum(truth == 1 & predict == 1), by = threshold]
   dt_thresholds[, FPs := sum(truth == 0 & predict == 1), by = threshold]
   dt_thresholds[, FNs := sum(truth == 1 & predict == 0), by = threshold]
+
+  dt_thresholds[, Ps := TPs + FNs]
+  dt_thresholds[, Ns := TNs + FPs]
 
   # Remove duplicates to keep one row per threshold
   dt_thresholds <- unique(dt_thresholds, by = "threshold")
@@ -158,7 +169,7 @@ get_performance_measures = function(score = data_BED_PLANNING_training$TOTAL_SCO
 
   dt_thresholds[, balanced_accuracy := (sens + spec) / 2]
 
-  dt_thresholds[, accuracy := (TNs + TPs) / .N]
+  dt_thresholds[, accuracy := (TNs + TPs) / (TNs + TPs + FNs + FPs)]
 
   prevalence <- sum(truth) / length(truth)
 
@@ -175,22 +186,14 @@ get_performance_measures = function(score = data_BED_PLANNING_training$TOTAL_SCO
   dt_thresholds[is.nan(youden), youden := NA]
 
   # Select the required columns and print results
-  results_dt <- dt_thresholds[, .(threshold, sens, spec, balanced_accuracy, accuracy, ppv, npv, f1_score, youden, TNs, TPs, FPs, FNs)]
+  results_dt <- dt_thresholds[, .(threshold, sens, spec, balanced_accuracy, accuracy, ppv, npv, f1_score, youden, TNs, TPs, FPs, FNs, Ps, Ns)]
 
   # Print results
   # print(results_dt)
 
   return(as.data.frame(results_dt))
 
-
-
 }
-
-
-
-
-
-
 
 
 #' all_measures
@@ -383,18 +386,21 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
 
 
   # calculate AUC and confidence bounds
-  auc = performance(prediction(score, truth), "auc")@y.values[[1]]
+  # auc = performance(prediction(score, truth), "auc")@y.values[[1]]
+  # auc = roc.curve(scores.class0 = score[[b]][truth[[b]]==0], scores.class1 = score[[b]][truth[[b]]==1])$auc
+  auc = as.numeric(pROC::auc(pROC::roc(truth, score)))
 
   if(!use_Boot){
     ciAUC = pROC::ci(pROC::roc(truth, score), conf.level = confidence_level)
-    if(auc<0.5){ # this performance() function does not distinguish control vs case. However, pROC::ci does. By doing this, pROC::ci always returns greater than 0.5. This part is to correct this.
-      auc_lower_bound = 1 - as.numeric(ciAUC)[3]
-      auc_upper_bound= 1 - as.numeric(ciAUC)[1]
-    }else{
+    # if(auc<0.5){ # this performance() function does not distinguish control vs case. However, pROC::ci does. By doing this, pROC::ci always returns greater than 0.5. This part is to correct this.
+    #   auc_lower_bound = 1 - as.numeric(ciAUC)[3]
+    #   auc_upper_bound= 1 - as.numeric(ciAUC)[1]
+    # }else{
+      # auc_lower_bound = as.numeric(ciAUC)[1]
+      # auc_upper_bound= as.numeric(ciAUC)[3]
+    # }
       auc_lower_bound = as.numeric(ciAUC)[1]
       auc_upper_bound= as.numeric(ciAUC)[3]
-    }
-
   }else{
     auc_boot = c()
 
@@ -410,7 +416,8 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
     # start = Sys.time();
     auc_boot = c()
     for(b in 1:n_Boot){
-      auc_boot[b] = roc.curve(scores.class0 = boot_scores[[b]], weights.class0 = boot_truths[[b]])$auc
+      # auc_boot[b] = roc.curve(scores.class0 = boot_scores[[b]], weights.class0 = boot_truths[[b]])$auc
+      auc_boot[b] = roc.curve(scores.class0 = boot_scores[[b]][boot_truths[[b]]==0], scores.class1 = boot_scores[[b]][boot_truths[[b]]==1])$auc
     }
     # end = Sys.time();end-start #Time difference of 2.891933 mins
 
@@ -424,7 +431,7 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
   # calculate PR auc and confidence bounds
   pr_temp = prcurve.ap(score[truth==1], score[truth==0])
   # pr_temp =   PRROC::pr.curve(score[truth==1], score[truth==0])
-  pr = pr_temp$auc
+  pr = pr = pr_temp$area
   if(!use_Boot){
     ciPR = pr_temp
     pr_lower_bound = ciPR$conf.int[1]
@@ -878,7 +885,7 @@ from_measure_to_ROC_curve = function(measures = BED_PLANNING_training_measures, 
 
   df = df[nrow(df):1, ]
 
-  ggplot(data=df, aes(x=y, y=x, group = type)) +
+  ggplot(data=df, aes(x=x, y=y, group = type)) +
     geom_line(aes(linetype = type))+
     geom_point(aes(size = type))+
     scale_linetype_manual(values=c("solid","dotted","dotted"))+

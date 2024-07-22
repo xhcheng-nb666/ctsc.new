@@ -14,11 +14,14 @@ Imports:
     data.table,
     ROCR,
     pROC,
-    pacman
+    pacman,
+    lubridate
 Suggests:
     testthat
 RoxygenNote: 7.3.1.9000
 imports::
   data.table
+  pROC
   PRROC
   ggplot2
+  lubridate
