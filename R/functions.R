@@ -886,6 +886,50 @@ from_measure_to_calibration_plot = function(measures = BED_PLANNING_training_mea
 
 }
 
+
+
+
+from_measures_to_threshold_plot = function(all_measures){
+
+
+  plot_data = data.table(
+    thresholds = all_measures$thresholds,
+    sens = all_measures$performance_measures$sens,
+    spec = all_measures$performance_measures$spec,
+    PPV = all_measures$performance_measures$ppv,
+    NPV = all_measures$performance_measures$npv
+  )
+  plot_long <- melt(plot_data,
+                    id.vars = "thresholds",
+                    measure.vars = c("sens", "spec", "PPV", "NPV"),
+                    variable.name = "Metric",
+                    value.name = "Value")
+
+  # Remove NA values (from PPV)
+  plot_long <- plot_long[!is.na(Value)]
+
+  # Plot
+  ggplot(plot_long, aes(x = thresholds, y = Value, color = Metric)) +
+    geom_line(size = 1) +
+    theme_minimal() +
+    labs(
+      x = "Threshold",
+      y = "Value",
+      title = "Sensitivity, Specificity, PPV, and NPV by Threshold",
+      color = "Metric"
+    ) +
+    scale_color_brewer(palette = "Set1")
+
+}
+
+
+
+
+
+
+
+
+
 from_measure_to_ROC_curve = function(measures = BED_PLANNING_training_measures, title = "ROC Curve", legend = TRUE, legend_position = 'bottom', xlab = '1 - Specificity', ylab = 'Sensitivity'){
 
   pacman::p_load(ggplot2)
@@ -1070,12 +1114,6 @@ rmarkdowncolortext <- function(x, color) {
     sprintf("<span style='color: %s;'>%s</span>", color,x)
   } else x
 }
-
-
-
-
-
-
 
 
 
