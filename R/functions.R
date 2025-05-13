@@ -388,7 +388,14 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
   # calculate AUC and confidence bounds
   # auc = performance(prediction(score, truth), "auc")@y.values[[1]]
   # auc = roc.curve(scores.class0 = score[[b]][truth[[b]]==0], scores.class1 = score[[b]][truth[[b]]==1])$auc
+
+  direction = mean(performance_measures$sens - (1 - performance_measures$spec))
+
+
   auc = as.numeric(pROC::auc(pROC::roc(truth, score)))
+  if(direction<0){
+    auc = 1-auc
+  }
 
   if(!use_Boot){
     ciAUC = pROC::ci(pROC::roc(truth, score), conf.level = confidence_level)
@@ -401,6 +408,12 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
     # }
       auc_lower_bound = as.numeric(ciAUC)[1]
       auc_upper_bound= as.numeric(ciAUC)[3]
+      if(direction<0){
+        auc_upper_bound0 = 1-auc_lower_bound
+        auc_lower_bound0 = 1-auc_upper_bound
+        auc_lower_bound = auc_lower_bound0
+        auc_upper_bound = auc_upper_bound0
+      }
   }else{
     auc_boot = c()
 
@@ -429,7 +442,7 @@ all_measures = function(score = data_BED_PLANNING_training$TOTAL_SCORE,
 
   # PRROC::pr.curve(score[truth==1], score[truth==0])
   # calculate PR auc and confidence bounds
-  pr_temp = prcurve.ap(score[truth==1], score[truth==0])
+  pr_temp = prcurve.ap(score[truth==1][!is.na(score[truth==1])], score[truth==0][!is.na(score[truth==0])])
   # pr_temp =   PRROC::pr.curve(score[truth==1], score[truth==0])
   pr = pr_temp$area
 
