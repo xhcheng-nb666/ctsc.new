@@ -17,6 +17,7 @@ export(rmarkdowncolortext)
 export(from_any_table_to_rmarkdown)
 export(from_any_data_frame_to_rmarkdown_using_DT)
 export(from_measures_to_rmarkdown_DT)
+export(from_measures_to_threshold_plot)
 
 import(data.table)
 import(PRROC)
